@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon商品リサーチ &amp; 利益計算</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <h1>📦 Amazon商品リサーチ &amp; 利益計算</h1>
+</header>
+
+<div id="toast-container"></div>
+
+<!-- ===== タブナビゲーション ===== -->
+<div class="tab-nav">
+  <button class="tab-btn active" data-tab="research">🔍 商品リサーチ</button>
+  <button class="tab-btn" data-tab="lookup">🔎 単品調査</button>
+  <button class="tab-btn" data-tab="analyze">💰 利益・ROI計算</button>
+  <button class="tab-btn" data-tab="watchlist">⭐ ウォッチリスト <span id="watchlist-badge" style="display:none;background:#ef4444;color:#fff;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px">0</span></button>
+  <button class="tab-btn" data-tab="listed">🛒 出品済み <span id="listed-badge" style="display:none;background:#2563eb;color:#fff;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px">0</span></button>
+</div>
+
+<!-- =============================================
+     TAB 1: 商品リサーチ
+     ============================================= -->
+<div id="tab-research" class="tab-content active">
+  <div class="research-layout">
+
+    <!-- フィルターパネル -->
+    <div class="card search-panel">
+      <div class="card-header">🔍 売れ筋商品を探す</div>
+      <div class="card-body">
+
+        <!-- データ状態 -->
+        <div id="cache-status-bar" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div id="cache-status-text" style="color:#0369a1">データを確認中...</div>
+          <button class="btn btn-outline btn-sm" id="btn-refresh-cache" style="white-space:nowrap;flex-shrink:0">↺ データ更新</button>
+        </div>
+
+        <!-- カテゴリ絞り込み -->
+        <div class="form-group">
+          <label>カテゴリで絞り込む（任意）</label>
+          <div class="cat-nav" id="cat-nav-root">
+            <div id="cat-display" class="cat-display" onclick="toggleCatPanel()">
+              <span id="cat-display-text">全カテゴリ（絞り込まない）</span>
+              <span class="cat-display-arrow">▼</span>
+            </div>
+            <div id="cat-panel" class="cat-panel" style="display:none">
+              <div id="cat-breadcrumb" class="cat-breadcrumb"></div>
+              <div id="cat-list" class="cat-list"></div>
+            </div>
+          </div>
+          <input type="hidden" id="filter-category" value="">
+        </div>
+
+        <!-- フィルター数値 -->
+        <div class="form-row" style="gap:16px;margin-bottom:12px">
+          <div class="form-group" style="margin-bottom:0">
+            <label>最大レビュー数</label>
+            <input type="number" id="filter-max-review" value="100" min="1" max="10000">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>最低月間販売数</label>
+            <input type="number" id="filter-min-sales" value="300" min="1">
+          </div>
+        </div>
+
+        <!-- 重みスライダー -->
+        <div class="form-group" style="margin-bottom:12px">
+          <label style="margin-bottom:6px;display:block">並び順の重み（各指標100点満点・重みで加重平均）</label>
+          <div style="display:grid;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+              <span style="width:110px;flex-shrink:0;color:#374151">📦 月間販売数</span>
+              <input type="range" id="w-sales" min="1" max="10" value="5" style="flex:1">
+              <span id="w-sales-val" style="width:16px;text-align:right;font-weight:700;color:#2563eb">5</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+              <span style="width:110px;flex-shrink:0;color:#374151">⭐ レビューの少なさ</span>
+              <input type="range" id="w-review" min="1" max="10" value="5" style="flex:1">
+              <span id="w-review-val" style="width:16px;text-align:right;font-weight:700;color:#2563eb">5</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="btn-browse" style="width:100%">この条件で絞り込む</button>
+      </div>
+    </div>
+
+    <!-- 判定基準の説明 -->
+    <div class="card criteria-card">
+      <div class="card-body" style="font-size:12px;color:#6b7280">
+        <strong style="color:#374151">仕組み</strong>：AmazonのベストセラーランキングをカテゴリごとにTop100まで自動収集。
+        小カテゴリ（ニッチ市場）まで深く調査するため、ライバルが少ない商品を発見しやすい。
+        <br><br>
+        <strong style="color:#374151">機会スコア</strong> = 販売数(50点) + レビューの少なさ(50点)
+        <br>食品・サプリ・医薬品カテゴリは中国輸入不可のため自動除外。
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 結果 -->
+  <div id="research-results" style="padding:0 16px 16px">
+    <div id="research-placeholder" class="card" style="text-align:center;padding:60px;color:#9ca3af">
+      <div style="font-size:40px;margin-bottom:12px">🔍</div>
+      <div>条件を設定して「この条件で絞り込む」を押してください</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     TAB 2: 単品調査
+     ============================================= -->
+<div id="tab-lookup" class="tab-content" style="display:none">
+  <div style="max-width:660px;margin:24px auto;padding:0 16px">
+
+    <div class="card">
+      <div class="card-header">🔎 単品調査</div>
+      <div class="card-body">
+        <p style="font-size:13px;color:#6b7280;margin-bottom:14px">
+          自分で見つけた商品のASINまたはAmazon URLを入力すると、機会スコア・Keepa需要分析を確認し、利益計算へ進めます。
+        </p>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="lookup-input"
+            placeholder="ASIN（例: B09ABCDEFG）またはAmazon商品URL"
+            style="flex:1">
+          <button class="btn btn-primary" id="btn-lookup" style="white-space:nowrap">調査する</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="lookup-result" style="margin-top:16px"></div>
+
+  </div>
+</div>
+
+<!-- =============================================
+     TAB 3: 利益・ROI計算
+     ============================================= -->
+<div id="tab-analyze" class="tab-content" style="display:none">
+<div class="app-layout">
+
+  <!-- ===== 左：入力パネル ===== -->
+  <div class="input-panel">
+
+    <!-- Amazon商品情報 -->
+    <div class="card">
+      <div class="card-header"><span class="step-label">1</span> Amazon商品情報</div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>商品名</label>
+          <input type="text" id="product-title" placeholder="商品名（リサーチから自動入力）">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Amazon販売価格（円）</label>
+            <input type="number" id="amazon-price" min="0" placeholder="2980">
+          </div>
+          <div class="form-group">
+            <label>月間販売数（推計）</label>
+            <input type="number" id="monthly-sales" min="0" placeholder="300">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>レビュー数（ベンチマーク商品）</label>
+            <input type="number" id="competitor-reviews" min="0" placeholder="50" readonly style="background:#f9fafb">
+          </div>
+          <div class="form-group">
+            <label>出品セラー数</label>
+            <input type="number" id="seller-count" min="1" value="3" readonly style="background:#f9fafb">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Amazonカテゴリ</label>
+          <select id="amazon-category">
+            <option value="">カテゴリを選択...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            梱包時の寸法（cm）・重量（g）
+            <span style="font-size:11px;font-weight:400;color:#6b7280;margin-left:4px">※FBA送料の算出根拠（商品サイズではなく梱包後のサイズ）</span>
+          </label>
+          <div class="form-row">
+            <input type="number" id="dim-length" min="0" step="0.1" placeholder="長さ">
+            <input type="number" id="dim-width" min="0" step="0.1" placeholder="幅">
+            <input type="number" id="dim-height" min="0" step="0.1" placeholder="高さ">
+            <input type="number" id="dim-weight" min="0" placeholder="重量g">
+          </div>
+          <div id="shipping-auto-display" style="font-size:12px;color:#2563eb;margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1688仕入れ情報 -->
+    <div class="card">
+      <div class="card-header"><span class="step-label">2</span> 1688 仕入れ情報</div>
+      <div class="card-body">
+
+        <!-- Amazon商品画像（1688で手動検索用） -->
+        <div id="amazon-product-preview" style="display:none;margin-bottom:14px">
+          <div style="font-size:12px;color:#6b7280;margin-bottom:6px">ドラッグして範囲を選択 → 保存ボタンで切り抜き画像を保存</div>
+          <div id="crop-container" style="position:relative;display:inline-block;cursor:crosshair;user-select:none">
+            <img id="amazon-product-image" src="" alt="Amazon商品画像"
+              style="max-height:200px;border-radius:6px;border:1px solid #e5e7eb;display:block">
+            <div id="crop-selection" style="position:absolute;border:2px solid #f97316;background:rgba(249,115,22,0.15);display:none;pointer-events:none;border-radius:2px"></div>
+          </div>
+          <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
+            <button id="btn-save-crop" class="btn btn-primary btn-sm" style="display:none" onclick="saveCroppedImage()">💾 選択範囲を保存</button>
+            <button id="btn-clear-crop" style="display:none;font-size:11px;padding:2px 8px;border:1px solid #d1d5db;border-radius:4px;background:#fff;cursor:pointer" onclick="clearCrop()">✕ リセット</button>
+            <span id="crop-hint" style="font-size:11px;color:#9ca3af">ドラッグして切り抜き範囲を指定</span>
+          </div>
+        </div>
+
+        <!-- 仕入れ価格入力 -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>仕入れ単価（元）</label>
+            <input type="number" id="purchase-price-cny" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>為替レート（円/元）</label>
+            <div style="display:flex;gap:4px">
+              <input type="number" id="exchange-rate" min="0" step="0.01" value="22" placeholder="22">
+              <button class="btn btn-outline btn-sm" id="btn-refresh-rate">更新</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>仕入れ単価（円）</label>
+          <input type="number" id="purchase-price-jpy" placeholder="自動計算（手動修正可）">
+        </div>
+
+        <!-- 代行業者手数料 -->
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            代行業者手数料
+            <span style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:400;color:#6b7280">
+              （仕入れ価格の
+              <input type="number" id="agent-fee-rate" value="5" min="0" max="100" step="1"
+                style="width:52px;padding:2px 6px;font-size:12px;border:1px solid #d1d5db;border-radius:4px">
+              %）
+            </span>
+          </label>
+          <input type="number" id="agent-fee-jpy" placeholder="自動計算（手動修正可）">
+        </div>
+
+        <!-- 中国国内送料 -->
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            中国国内送料
+            <span style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:400;color:#6b7280">
+              （仕入れ価格の
+              <input type="number" id="domestic-shipping-rate" value="10" min="0" max="100" step="1"
+                style="width:52px;padding:2px 6px;font-size:12px;border:1px solid #d1d5db;border-radius:4px">
+              %）
+              <span style="color:#9ca3af">※取引前の目安。実額判明後に変更可</span>
+            </span>
+          </label>
+          <input type="number" id="domestic-shipping-jpy" placeholder="自動計算（手動修正可）">
+        </div>
+
+        <!-- 国際輸送方法 -->
+        <div class="form-group" style="margin-bottom:12px">
+          <label>国際輸送方法</label>
+          <select id="shipping-method" onchange="onShippingMethodChange()">
+            <option value="fast_sea">🚢 快速船便（航空海上混載）</option>
+            <option value="container_fba_direct">📦 コンテナ便 → FBA直納</option>
+          </select>
+        </div>
+
+        <!-- 快速船便 情報ボックス -->
+        <div id="intl-shipping-per-unit-box" style="display:none;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#1e40af">
+        </div>
+
+        <!-- コンテナ便 情報ボックス -->
+        <div id="container-shipping-per-unit-box" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#166534">
+        </div>
+        <!-- 佐川BtoC 情報ボックス（コンテナ便選択時） -->
+        <div id="sagawa-btoc-box" style="display:none;background:#fefce8;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#854d0e">
+        </div>
+
+        <div id="intl-shipping-input-row" style="display:none">
+          <div class="form-group" style="margin-bottom:12px">
+            <label style="display:flex;align-items:center;gap:6px">
+              国際送料 / 個（円）
+              <span style="font-size:11px;font-weight:400;color:#6b7280">自動計算 ― 実額が判明したら上書き可</span>
+            </label>
+            <input type="number" id="intl-shipping-input" min="0" placeholder="自動計算" style="background:#f0f9ff">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>発注数量（国際送料計算に使用）</label>
+          <input type="number" id="order-quantity" min="1" value="100">
+        </div>
+      </div>
+    </div>
+
+    <!-- その他費用 -->
+    <div class="card">
+      <div class="card-header"><span class="step-label">3</span> その他費用・関税</div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>関税カテゴリ</label>
+          <select id="customs-category">
+            <option value="">カテゴリを選択...</option>
+          </select>
+          <div id="customs-rate-display" style="font-size:12px;color:#2563eb;margin-top:4px"></div>
+        </div>
+        <div class="form-group">
+          <label>検品費用 / 個（円）　※国内作業所</label>
+          <input type="number" id="inspection-fee" min="0" value="30">
+        </div>
+        <div class="form-group">
+          <label>
+            FBA納品送料 / 個（円）　※国内作業所→FBA倉庫
+            <span style="font-size:11px;font-weight:400;color:#6b7280;margin-left:4px">自動計算（140サイズ・ヤマトパートナーキャリア）</span>
+          </label>
+          <input type="number" id="fba-domestic-shipping" placeholder="自動計算（手動修正可）">
+          <div id="fba-domestic-shipping-detail" style="font-size:12px;color:#2563eb;margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 計算ボタン -->
+    <button class="btn btn-success btn-block" id="btn-analyze" style="padding:16px;font-size:16px">
+      💰 利益・ROI を計算する
+    </button>
+
+  </div><!-- /input-panel -->
+
+  <!-- ===== 右：結果パネル ===== -->
+  <div class="result-panel">
+
+    <!-- 待機プレースホルダー -->
+    <div id="analyze-placeholder" class="card">
+      <div class="card-body" style="text-align:center;padding:60px 20px;color:#9ca3af">
+        <div style="font-size:48px;margin-bottom:12px">💰</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px">ROI計算の流れ</div>
+        <div style="font-size:13px;line-height:2.2">
+          1. リサーチタブで気になる商品を見つける<br>
+          2. 「この商品を分析」で自動入力<br>
+          3. 1688で仕入れ価格を検索<br>
+          4. 「計算」ボタンでROI・純利益を確認
+        </div>
+      </div>
+    </div>
+
+    <!-- 計算結果 -->
+    <div id="analyze-result" style="display:none">
+
+      <!-- ROIヒーロー -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-body">
+          <div class="roi-hero" id="roi-hero">
+            <div class="roi-grid">
+              <div class="roi-item">
+                <div class="roi-label">純利益 / 個</div>
+                <div class="roi-value" id="res-net-profit">—</div>
+              </div>
+              <div class="roi-item highlight">
+                <div class="roi-label">ROI</div>
+                <div class="roi-value" id="res-roi">—</div>
+                <div style="font-size:11px;opacity:.7">純利益 ÷ 仕入れ</div>
+              </div>
+              <div class="roi-item">
+                <div class="roi-label">月間純利益</div>
+                <div class="roi-value" id="res-monthly">—</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn btn-outline btn-sm" id="btn-save-result" onclick="saveCurrentResult()">
+              💾 この結果を保存する
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- コスト内訳 -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">📊 コスト内訳</div>
+        <div class="card-body" style="padding:0">
+          <table class="breakdown-table">
+            <tbody id="cost-breakdown-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 広告費（ACOS） -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">📢 広告費（トータルACOS）</div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <label style="font-size:13px;font-weight:600;white-space:nowrap">トータルACOS</label>
+            <input type="number" id="total-acos" value="20" min="0" max="100" step="1"
+              style="width:70px" oninput="onAcosChange()">
+            <span style="color:#6b7280;font-size:13px">%</span>
+            <span style="font-size:11px;color:#6b7280">※ 広告費 / 売上高</span>
+          </div>
+          <div style="padding:10px;background:#fef9c3;border-radius:6px;font-size:12px">
+            広告費 / 個：<strong id="res-ad-cost">—</strong>
+            <span style="color:#6b7280;margin-left:8px">（販売価格 × トータルACOS）</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 利益サマリ -->
+      <div class="card">
+        <div class="card-header">📈 利益サマリ</div>
+        <div class="card-body" style="padding:0">
+          <table class="breakdown-table">
+            <tbody id="profit-summary-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- OEM改善案パネル -->
+      <div id="oem-panel" style="display:none">
+        <div class="card" style="border:2px solid #6366f1">
+          <div class="card-header" style="background:#eef2ff;color:#3730a3;display:flex;align-items:center;justify-content:space-between">
+            <span>🛠 OEM差別化：物理的改善案（AI生成）</span>
+            <button id="btn-oem-generate" onclick="generateOemSuggestions()"
+              style="font-size:12px;padding:4px 12px;background:#6366f1;color:#fff;border:none;border-radius:6px;cursor:pointer">
+              ✨ 生成する
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="oem-loading" style="display:none;text-align:center;padding:20px;color:#6b7280">
+              <span class="spinner" style="display:inline-block;width:16px;height:16px;border-width:2px;margin-right:8px;vertical-align:middle"></span>
+              Claudeが改善案を考えています...（5〜15秒）
+            </div>
+            <div id="oem-error" style="display:none;color:#dc2626;font-size:13px;padding:8px"></div>
+            <div id="oem-results" style="display:none">
+              <div id="oem-cards" style="display:flex;flex-direction:column;gap:10px"></div>
+            </div>
+            <div id="oem-placeholder" style="color:#9ca3af;font-size:13px;text-align:center;padding:16px">
+              「✨ 生成する」を押すと、この商品に特化した物理的改善案をAIが提案します
+            </div>
+          </div>
+        </div>
+      </div><!-- /oem-panel -->
+
+    </div><!-- /analyze-result -->
+  </div><!-- /result-panel -->
+
+</div><!-- /app-layout -->
+</div><!-- /tab-analyze -->
+
+<!-- =============================================
+     TAB 4: ウォッチリスト
+     ============================================= -->
+<div id="tab-watchlist" class="tab-content" style="display:none">
+  <div style="max-width:900px;margin:24px auto;padding:0 16px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 style="font-size:16px;font-weight:700;color:#374151;margin:0">⭐ ウォッチリスト</h2>
+      <button class="btn btn-outline btn-sm" onclick="clearWatchlist()" style="color:#dc2626;border-color:#fca5a5">全て削除</button>
+    </div>
+
+    <div id="watchlist-empty" style="text-align:center;padding:60px;color:#9ca3af">
+      <div style="font-size:40px;margin-bottom:12px">⭐</div>
+      <div>商品カードの「☆ ウォッチ」ボタンで追加できます</div>
+    </div>
+
+    <div id="watchlist-grid" class="result-grid" style="display:none"></div>
+
+  </div>
+</div>
+
+<!-- =============================================
+     TAB 5: 出品済み管理
+     ============================================= -->
+<div id="tab-listed" class="tab-content" style="display:none">
+  <div style="max-width:960px;margin:24px auto;padding:0 16px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 style="font-size:16px;font-weight:700;color:#374151;margin:0">🛒 出品済み管理</h2>
+      <button class="btn btn-outline btn-sm" onclick="loadListedHistory()" style="white-space:nowrap">↺ 再読み込み</button>
+    </div>
+
+    <div id="listed-loading" style="text-align:center;padding:40px;color:#6b7280;display:none">読み込み中...</div>
+
+    <div id="listed-empty" style="text-align:center;padding:60px;color:#9ca3af">
+      <div style="font-size:40px;margin-bottom:12px">🛒</div>
+      <div>利益・ROI計算タブで「💾 この結果を保存する」を押すと、ここに蓄積されます</div>
+    </div>
+
+    <div id="listed-list" style="display:none;flex-direction:column;gap:12px"></div>
+
+  </div>
+</div>
+
+<!-- =============================================
+     出品済み 詳細モーダル
+     ============================================= -->
+<div id="listed-detail-modal" onclick="if(event.target===this)closeListedModal()"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;overflow-y:auto;padding:24px 16px">
+  <div style="max-width:640px;margin:0 auto">
+
+    <!-- ヘッダー -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-body" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div>
+          <div id="modal-product-name" style="font-size:15px;font-weight:700;color:#111827;margin-bottom:4px"></div>
+          <div id="modal-product-date" style="font-size:11px;color:#9ca3af"></div>
+        </div>
+        <button onclick="closeListedModal()"
+          style="flex-shrink:0;font-size:18px;line-height:1;background:none;border:none;cursor:pointer;color:#6b7280;padding:2px 6px">✕</button>
+      </div>
+    </div>
+
+    <!-- ROIヒーロー -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-body">
+        <div class="roi-hero">
+          <div class="roi-grid">
+            <div class="roi-item">
+              <div class="roi-label">純利益 / 個</div>
+              <div class="roi-value" id="modal-res-net-profit">—</div>
+            </div>
+            <div class="roi-item highlight">
+              <div class="roi-label">ROI</div>
+              <div class="roi-value" id="modal-res-roi">—</div>
+              <div style="font-size:11px;opacity:.7">純利益 ÷ 仕入れ</div>
+            </div>
+            <div class="roi-item">
+              <div class="roi-label">月間純利益</div>
+              <div class="roi-value" id="modal-res-monthly">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- コスト内訳 -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-header">📊 コスト内訳</div>
+      <div class="card-body" style="padding:0">
+        <table class="breakdown-table">
+          <tbody id="modal-cost-breakdown-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 広告費（ACOS） -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-header">📢 広告費（トータルACOS）</div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <label style="font-size:13px;font-weight:600;white-space:nowrap">トータルACOS</label>
+          <input type="number" id="modal-total-acos" value="20" min="0" max="100" step="1"
+            style="width:70px" oninput="onModalAcosChange()">
+          <span style="color:#6b7280;font-size:13px">%</span>
+        </div>
+        <div style="padding:10px;background:#fef9c3;border-radius:6px;font-size:12px">
+          広告費 / 個：<strong id="modal-res-ad-cost">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- 利益サマリ -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-header">📈 利益サマリ</div>
+      <div class="card-body" style="padding:0">
+        <table class="breakdown-table">
+          <tbody id="modal-profit-summary-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- OEM改善案パネル（モーダル内） -->
+    <div class="card" style="margin-bottom:24px;border:2px solid #6366f1">
+      <div class="card-header" style="background:#eef2ff;color:#3730a3;display:flex;align-items:center;justify-content:space-between">
+        <span>🛠 OEM差別化：物理的改善案（AI生成）</span>
+        <button onclick="generateOemSuggestionsModal()"
+          style="font-size:12px;padding:4px 12px;background:#6366f1;color:#fff;border:none;border-radius:6px;cursor:pointer">
+          ✨ 生成する
+        </button>
+      </div>
+      <div class="card-body">
+        <div id="modal-oem-loading" style="display:none;text-align:center;padding:16px;color:#6b7280">
+          <span class="spinner" style="display:inline-block;width:16px;height:16px;border-width:2px;margin-right:8px;vertical-align:middle"></span>
+          Claudeが改善案を考えています...（5〜15秒）
+        </div>
+        <div id="modal-oem-error" style="display:none;color:#dc2626;font-size:13px;padding:8px"></div>
+        <div id="modal-oem-cards" style="display:flex;flex-direction:column;gap:10px"></div>
+        <div id="modal-oem-placeholder" style="color:#9ca3af;font-size:13px;text-align:center;padding:16px">
+          「✨ 生成する」を押すと、この商品に特化した物理的改善案をAIが提案します
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/constants.js"></script>
+<script src="js/calculators.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/main.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

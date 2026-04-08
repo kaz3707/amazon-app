@@ -10,3 +10,5 @@ __pycache__/
 venv/
 .venv/
 data/1688_session/
+node_modules/
+.netlify/
