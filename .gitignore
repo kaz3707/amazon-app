@@ -12,3 +12,4 @@ venv/
 data/1688_session/
 node_modules/
 .netlify/
+requirements.txt
