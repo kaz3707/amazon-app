@@ -1,0 +1,26 @@
+[    1212ms] TypeError: b.cardModuleFactory is not a function
+    at https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:17:429
+    at d (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:55:83)
+    at Object.next (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:369)
+    at m (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:152)
+[    1216ms] TypeError: b.cardModuleFactory is not a function
+    at https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:17:429
+    at d (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:55:83)
+    at Object.next (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:369)
+    at m (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:152)
+[    1217ms] TypeError: b.cardModuleFactory is not a function
+    at https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:17:429
+    at d (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:55:83)
+    at Object.next (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:369)
+    at m (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:152)
+[    1313ms] TypeError: b.cardModuleFactory is not a function
+    at https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:17:429
+    at d (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:55:83)
+    at Object.next (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:369)
+    at m (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:152)
+[    1480ms] [ERROR] Failed to load resource: the server responded with a status of 405 () @ https://www.amazon.co.jp/suggestions:0
+[    2225ms] [WARNING] VIDEOJS: WARN: Using hls options is deprecated. Use vhs instead. @ https://m.media-amazon.com/images/I/21fOfDNeAIL._RC%7C01x4giTy+uL.js,01r9LpT6pbL.js,41NWBkfooBL.js,11QfrzttlqL.js,91VXiFQ1TCL.js,01ELLYeIOkL.js_.js?AUIClients/Brila:118
+[    2238ms] [WARNING] VIDEOJS: WARN: Using hls options is deprecated. Use vhs instead. @ https://m.media-amazon.com/images/I/21fOfDNeAIL._RC%7C01x4giTy+uL.js,01r9LpT6pbL.js,41NWBkfooBL.js,11QfrzttlqL.js,91VXiFQ1TCL.js,01ELLYeIOkL.js_.js?AUIClients/Brila:118
+[    2244ms] [WARNING] VIDEOJS: WARN: Using hls options is deprecated. Use vhs instead. @ https://m.media-amazon.com/images/I/21fOfDNeAIL._RC%7C01x4giTy+uL.js,01r9LpT6pbL.js,41NWBkfooBL.js,11QfrzttlqL.js,91VXiFQ1TCL.js,01ELLYeIOkL.js_.js?AUIClients/Brila:118
+[    2250ms] [WARNING] VIDEOJS: WARN: Using hls options is deprecated. Use vhs instead. @ https://m.media-amazon.com/images/I/21fOfDNeAIL._RC%7C01x4giTy+uL.js,01r9LpT6pbL.js,41NWBkfooBL.js,11QfrzttlqL.js,91VXiFQ1TCL.js,01ELLYeIOkL.js_.js?AUIClients/Brila:118
+[    2269ms] [WARNING] VIDEOJS: WARN: Using hls options is deprecated. Use vhs instead. @ https://m.media-amazon.com/images/I/21fOfDNeAIL._RC%7C01x4giTy+uL.js,01r9LpT6pbL.js,41NWBkfooBL.js,11QfrzttlqL.js,91VXiFQ1TCL.js,01ELLYeIOkL.js_.js?AUIClients/Brila:118

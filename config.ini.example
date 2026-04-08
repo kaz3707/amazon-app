@@ -1,0 +1,15 @@
+[sale_monster]
+login_id = your_sale_monster_id
+password = your_sale_monster_password
+login_url = https://www.sale-monster.com/login
+
+[cache]
+fee_cache_ttl_hours = 24
+customs_cache_ttl_days = 7
+exchange_rate_ttl_minutes = 60
+
+[app]
+debug = true
+secret_key = change-this-to-random-string
+upload_folder = uploads
+max_upload_size_mb = 10

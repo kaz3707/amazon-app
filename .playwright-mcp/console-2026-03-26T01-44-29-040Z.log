@@ -1,0 +1,11 @@
+[    1091ms] TypeError: b.cardModuleFactory is not a function
+    at https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:17:429
+    at d (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:55:83)
+    at Object.next (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:369)
+    at m (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:152)
+[    1095ms] TypeError: b.cardModuleFactory is not a function
+    at https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:17:429
+    at d (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:55:83)
+    at Object.next (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:369)
+    at m (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:152)
+[    1479ms] [ERROR] Failed to load resource: the server responded with a status of 405 () @ https://www.amazon.co.jp/suggestions:0

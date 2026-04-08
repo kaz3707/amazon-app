@@ -1,0 +1,14 @@
+[    2097ms] TypeError: b.cardModuleFactory is not a function
+    at https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:17:429
+    at d (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:55:83)
+    at Object.next (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:369)
+    at m (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:152)
+[    2226ms] TypeError: b.cardModuleFactory is not a function
+    at https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:17:429
+    at d (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:55:83)
+    at Object.next (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:369)
+    at m (https://m.media-amazon.com/images/I/517f0agMn-L.js?AUIClients/CardJsRuntimeBuzzCopyBuild:53:152)
+[    2624ms] [ERROR] Failed to load resource: the server responded with a status of 405 () @ https://www.amazon.co.jp/suggestions:0
+[    2917ms] [WARNING] VIDEOJS: WARN: Using hls options is deprecated. Use vhs instead. @ https://m.media-amazon.com/images/I/21fOfDNeAIL._RC%7C01x4giTy+uL.js,01r9LpT6pbL.js,41NWBkfooBL.js,11QfrzttlqL.js,91VXiFQ1TCL.js,01ELLYeIOkL.js_.js?AUIClients/Brila:118
+[   91911ms] [ERROR] Error logged with the Track&Report JS errors API(http://tiny/1covqr6l8/wamazindeClieUserJava): {"m":"Client-side initialization timeout","csm":"v5 ueLogError callee","logLevel":"WARN","attribution":"p13n-zg-banner-list-page-header","pageURL":"https://www.amazon.co.jp/gp/bestsellers/pet-supplies/","s":[],"t":90815} {m: Client-side initialization timeout, name: undefined, type: undefined, csm: v5 ueLogError callee, logLevel: WARN} @ https://images-fe.ssl-images-amazon.com/images/I/215h87l68bL.js:3
+[   91921ms] [ERROR] Error logged with the Track&Report JS errors API(http://tiny/1covqr6l8/wamazindeClieUserJava): {"m":"Client-side initialization timeout","csm":"v5 ueLogError callee","logLevel":"WARN","attribution":"p13n-zg-nav-tree-all","pageURL":"https://www.amazon.co.jp/gp/bestsellers/pet-supplies/","s":[],"t":90832} {m: Client-side initialization timeout, name: undefined, type: undefined, csm: v5 ueLogError callee, logLevel: WARN} @ https://images-fe.ssl-images-amazon.com/images/I/215h87l68bL.js:3

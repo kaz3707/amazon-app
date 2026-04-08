@@ -1,0 +1,12 @@
+config.ini
+.env
+instance/
+uploads/
+static/img/tmp/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+venv/
+.venv/
+data/1688_session/

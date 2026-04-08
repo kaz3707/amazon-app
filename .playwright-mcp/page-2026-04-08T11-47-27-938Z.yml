@@ -1,0 +1,50 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "📦 Amazon商品リサーチ & 利益計算" [level=1] [ref=e3]
+  - generic [ref=e4]:
+    - button "🔍 商品リサーチ" [ref=e5] [cursor=pointer]
+    - button "🔎 単品調査" [ref=e6] [cursor=pointer]
+    - button "💰 利益・ROI計算" [ref=e7] [cursor=pointer]
+    - button "⭐ ウォッチリスト" [ref=e8] [cursor=pointer]
+    - button "🛒 出品済み" [ref=e9] [cursor=pointer]
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]: 🔍 売れ筋商品を探す
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]: "最終更新: 2026/3/27 12:07:02 商品数: 80,125件"
+            - button "↺ データ更新" [ref=e17] [cursor=pointer]
+          - generic [ref=e18]:
+            - generic [ref=e19]: カテゴリで絞り込む（任意）
+            - generic [ref=e21] [cursor=pointer]:
+              - generic [ref=e22]: 全カテゴリ（絞り込まない）
+              - generic [ref=e23]: ▼
+          - generic [ref=e24]:
+            - generic [ref=e25]:
+              - generic [ref=e26]: 最大レビュー数
+              - spinbutton [ref=e27]: "100"
+            - generic [ref=e28]:
+              - generic [ref=e29]: 最低月間販売数
+              - spinbutton [ref=e30]: "300"
+          - generic [ref=e31]:
+            - generic [ref=e32]: 並び順の重み（各指標100点満点・重みで加重平均）
+            - generic [ref=e33]:
+              - generic [ref=e34]:
+                - generic [ref=e35]: 📦 月間販売数
+                - slider [ref=e36]: "5"
+                - generic [ref=e37]: "5"
+              - generic [ref=e38]:
+                - generic [ref=e39]: ⭐ レビューの少なさ
+                - slider [ref=e40]: "5"
+                - generic [ref=e41]: "5"
+          - button "この条件で絞り込む" [ref=e42] [cursor=pointer]
+      - generic [ref=e44]:
+        - strong [ref=e45]: 仕組み
+        - text: ：AmazonのベストセラーランキングをカテゴリごとにTop100まで自動収集。 小カテゴリ（ニッチ市場）まで深く調査するため、ライバルが少ない商品を発見しやすい。
+        - strong [ref=e46]: 機会スコア
+        - text: = 販売数(50点) + レビューの少なさ(50点)
+        - text: 食品・サプリ・医薬品カテゴリは中国輸入不可のため自動除外。
+    - generic [ref=e48]:
+      - generic [ref=e49]: 🔍
+      - generic [ref=e50]: 条件を設定して「この条件で絞り込む」を押してください
