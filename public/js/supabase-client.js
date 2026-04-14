@@ -45,9 +45,10 @@ async function fetchBestsellerProducts(maxReview = 100, minSales = 300, category
 async function fetchCategories() {
   const sb = getSupabase();
   // PostgREST はテーブル/ビューに対し max-rows 1000 が効くため、RPC 経由で全件取得する
+  // RPC は jsonb で文字列配列を返すので data はそのまま string[]
   const { data, error } = await sb.rpc("get_bestseller_categories");
   if (error) throw new Error(error.message);
-  return (data || []).map(d => d.category_path);
+  return Array.isArray(data) ? data : [];
 }
 
 // ──────────────────────────────────────────
