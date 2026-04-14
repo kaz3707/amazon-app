@@ -220,6 +220,8 @@ function selectCatValue(value, label) {
 
 async function runBrowse() {
   const maxReview = parseInt(document.getElementById("filter-max-review").value) || 100;
+  const minReviewRaw = document.getElementById("filter-min-review")?.value;
+  const minReview = (minReviewRaw === "" || minReviewRaw === undefined) ? 1 : (parseInt(minReviewRaw) || 0);
   const minSales = parseInt(document.getElementById("filter-min-sales").value) || 300;
   const category = document.getElementById("filter-category").value || "";
   const btn = document.getElementById("btn-browse");
@@ -232,7 +234,7 @@ async function runBrowse() {
   </div>`;
 
   try {
-    const results = await fetchBestsellerProducts(maxReview, minSales, category || null);
+    const results = await fetchBestsellerProducts(maxReview, minSales, category || null, minReview);
     state.browseResults = results;
     renderResearchResults({ results, count: results.length, category: category || "全カテゴリ" });
   } catch (e) {

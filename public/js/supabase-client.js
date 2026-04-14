@@ -19,11 +19,12 @@ function getSupabase() {
 // ベストセラー商品の取得
 // ──────────────────────────────────────────
 
-async function fetchBestsellerProducts(maxReview = 100, minSales = 300, categoryPrefix = null) {
+async function fetchBestsellerProducts(maxReview = 100, minSales = 300, categoryPrefix = null, minReview = 1) {
   const sb = getSupabase();
   let query = sb
     .from("bestseller_products")
     .select("*")
+    .gte("review_count", minReview)
     .lte("review_count", maxReview)
     .gte("estimated_monthly_sales", minSales)
     .order("opportunity_score", { ascending: false })
