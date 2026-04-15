@@ -55,13 +55,14 @@ function renderBoughtCell(asin, count, text) {
   const cell = document.getElementById(`bought-cell-${asin}`);
   if (!cell) return;
   if (count > 0) {
+    const hasPlus = /以上/.test(text || '');
     cell.innerHTML =
-      `<div class="stat-value good">${Number(count).toLocaleString()}以上</div>
-       <div class="stat-label" title="${(text || '').replace(/"/g, '&quot;')}">🟢 月販実績</div>`;
+      `<div class="stat-value good">${Number(count).toLocaleString()}点${hasPlus ? '以上' : ''}</div>
+       <div class="stat-label" title="${(text || '').replace(/"/g, '&quot;')}">🟢 過去1ヶ月 購入</div>`;
   } else {
     cell.innerHTML =
-      `<div class="stat-value" style="color:#9ca3af;font-size:14px">実績バッジなし</div>
-       <div class="stat-label">購入実績データなし</div>`;
+      `<div class="stat-value" style="color:#9ca3af;font-size:13px">該当表記なし</div>
+       <div class="stat-label">過去1ヶ月の購入表記なし</div>`;
   }
 }
 
@@ -406,10 +407,10 @@ function buildProductCardEl(p) {
       <div class="stat-item" id="bought-cell-${p.asin}">
         ${p.bought_in_past_month != null
           ? (p.bought_in_past_month > 0
-              ? `<div class="stat-value good">${Number(p.bought_in_past_month).toLocaleString()}以上</div>
-                 <div class="stat-label" title="Amazon公式の購入実績">🟢 月販実績</div>`
-              : `<div class="stat-value" style="color:#9ca3af;font-size:14px">実績バッジなし</div>
-                 <div class="stat-label">購入実績データなし</div>`)
+              ? `<div class="stat-value good">${Number(p.bought_in_past_month).toLocaleString()}点${/以上/.test(p.bought_in_past_month_text || '') ? '以上' : ''}</div>
+                 <div class="stat-label" title="${(p.bought_in_past_month_text || '').replace(/"/g, '&quot;')}">🟢 過去1ヶ月 購入</div>`
+              : `<div class="stat-value" style="color:#9ca3af;font-size:13px">該当表記なし</div>
+                 <div class="stat-label">過去1ヶ月の購入表記なし</div>`)
           : `<div class="stat-value ${salesClass}" style="color:#9ca3af">~${Number(p.estimated_monthly_sales).toLocaleString()}</div>
              <div class="stat-label" title="BSR順位からの推計（誤差大）">⚠ 月販推計(BSR)</div>
              <button class="bought-fetch-btn" data-asin="${p.asin}" style="margin-top:4px;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer">実売数を取得</button>`
