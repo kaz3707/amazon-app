@@ -66,6 +66,8 @@ header .header-actions { display: flex; gap: 8px; }
   box-shadow: var(--shadow);
   overflow: hidden;
 }
+/* カテゴリパネルを載せるカードは overflow:visible でパネル下端が切れないように */
+.card.search-panel { overflow: visible; }
 .card-header {
   background: var(--gray-50);
   border-bottom: 1px solid var(--gray-200);
