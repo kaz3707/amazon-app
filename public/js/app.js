@@ -447,7 +447,7 @@ function buildProductCardEl(p) {
       ${rankBadge}
       ${keepaBadge}
     </div>
-    <div class="product-title">${p.title}</div>
+    <a class="product-title product-title-link" href="${p.url || `https://www.amazon.co.jp/dp/${p.asin}`}" target="_blank" rel="noopener" title="Amazon商品ページを新規タブで開く">${p.title}</a>
     <div style="font-size:11px;color:#6b7280;margin-bottom:8px">${p.category_path || p.category || ""}</div>
     <div class="product-stats">
       <div class="stat-item">
@@ -486,7 +486,11 @@ function buildProductCardEl(p) {
       </div>
     </div>
     <div style="font-size:11px;color:#9ca3af;margin-bottom:8px">★ ${p.rating}</div>
-    <div style="display:flex;gap:6px;margin-top:8px">
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+      <button class="deepdive-btn" style="flex:1 1 100%;padding:8px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600"
+        onclick="selectProductForAnalysis(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+        🔍 深堀り（利益計算へ）→
+      </button>
       <button class="analyze-btn" style="flex:1" onclick="openRivalModal(${JSON.stringify(p).replace(/"/g, '&quot;')})">
         同カテゴリ TOP100を確認 →
       </button>
