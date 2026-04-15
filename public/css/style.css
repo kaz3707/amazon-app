@@ -737,8 +737,22 @@ input[readonly] { background: var(--gray-50); color: var(--gray-600); }
 }
 .top100-row:last-child { border-bottom: none; }
 .top100-row:hover { background: #f8fafc; }
-.top100-row--self { background: #eff6ff; }
+.top100-row--self { background: #eff6ff; border-left: 3px solid #2563eb; padding-left: 9px; }
 .top100-row--self:hover { background: #dbeafe; }
+.top100-row--hit { background: #f0fdf4; border-left: 3px solid #16a34a; padding-left: 9px; }
+.top100-row--hit:hover { background: #dcfce7; }
+
+.top100-hitmark {
+  display: inline-block;
+  background: #16a34a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 3px;
+  padding: 0 5px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
 
 .top100-rank {
   font-size: 11px;
@@ -746,6 +760,19 @@ input[readonly] { background: var(--gray-50); color: var(--gray-600); }
   font-weight: 600;
   white-space: nowrap;
 }
+.top100-rank-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-align: center;
+}
+.rank-gold { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.rank-silver { background: #e5e7eb; color: #374151; border: 1px solid #d1d5db; }
+.rank-bronze { background: #fed7aa; color: #9a3412; border: 1px solid #fdba74; }
+.rank-plain { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
 .top100-title {
   color: var(--gray-800);
   line-height: 1.4;

@@ -637,23 +637,46 @@ function renderCategoryTop100(products, categoryPath, targetProduct) {
     return;
   }
 
+  // 検索絞り込みにヒットしている商品のASINセット（このモーダル上でハイライトする）
+  const hitAsins = new Set((state.browseResults || []).map(p => p.asin));
+  let hitCount = 0;
+
+  const rankBadgeClass = (r) => {
+    if (r <= 10) return "top100-rank-badge rank-gold";
+    if (r <= 30) return "top100-rank-badge rank-silver";
+    if (r <= 50) return "top100-rank-badge rank-bronze";
+    return "top100-rank-badge rank-plain";
+  };
+
   const rowsHtml = products.map((c, i) => {
     const rank = c.rank_in_category || (i + 1);
     const title = c.title.length > 55 ? c.title.slice(0, 55) + "…" : c.title;
+    const isSelf = c.asin === targetProduct.asin;
+    const isHit = hitAsins.has(c.asin) && !isSelf;
+    if (isHit) hitCount++;
+    const rowClass = "top100-row" +
+      (isSelf ? " top100-row--self" : "") +
+      (isHit ? " top100-row--hit" : "");
+    const hitMark = isHit ? '<span class="top100-hitmark" title="絞り込み条件にヒット">✓</span>' : "";
     return `
-      <div class="top100-row${c.asin === targetProduct.asin ? " top100-row--self" : ""}">
-        <span class="top100-rank">${rank}位</span>
-        <span class="top100-title">${title}</span>
+      <div class="${rowClass}">
+        <span class="${rankBadgeClass(rank)}">${rank}位</span>
+        <span class="top100-title">${hitMark}<a href="${c.url || `https://www.amazon.co.jp/dp/${c.asin}`}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${title}</a></span>
         <span class="top100-price">¥${(Number(c.price) || 0).toLocaleString()}</span>
         <span class="top100-reviews" style="color:${reviewColor(c.review_count || 0)}">⭐${(c.review_count || 0).toLocaleString()}</span>
         <span class="top100-sales" style="color:${salesColor(c.estimated_monthly_sales || 0)}">月販${(c.estimated_monthly_sales || 0).toLocaleString()}</span>
-        <a class="top100-link" href="${c.url}" target="_blank" rel="noopener">↗</a>
+        <a class="top100-link" href="${c.url || `https://www.amazon.co.jp/dp/${c.asin}`}" target="_blank" rel="noopener">↗</a>
       </div>`;
   }).join("");
 
+  const hitLegend = hitCount > 0
+    ? `<span style="margin-left:10px;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:4px;font-weight:600">✓ 絞り込みヒット: ${hitCount}件</span>`
+    : "";
+
   body.innerHTML = selfHtml + `
-    <div style="font-size:12px;color:#6b7280;margin-bottom:8px">
-      ${categoryPath} — ${products.length}件
+    <div style="font-size:12px;color:#6b7280;margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap">
+      <span>${categoryPath} — ${products.length}件</span>
+      ${hitLegend}
     </div>
     <div class="top100-list">${rowsHtml}</div>`;
 }
