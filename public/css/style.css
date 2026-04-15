@@ -733,7 +733,7 @@ input[readonly] { background: var(--gray-50); color: var(--gray-600); }
 
 .top100-row {
   display: grid;
-  grid-template-columns: 46px 1fr 80px 64px 72px 28px;
+  grid-template-columns: 52px 1fr 80px 64px 72px 34px 28px;
   align-items: center;
   gap: 8px;
   padding: 7px 12px;
@@ -742,6 +742,19 @@ input[readonly] { background: var(--gray-50); color: var(--gray-600); }
   background: #fff;
   transition: background .1s;
 }
+.top100-calc-btn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 0;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  text-align: center;
+  transition: background .1s;
+}
+.top100-calc-btn:hover { background: #6d28d9; }
 .top100-row:last-child { border-bottom: none; }
 .top100-row:hover { background: #f8fafc; }
 .top100-row--self { background: #eff6ff; border-left: 3px solid #2563eb; padding-left: 9px; }

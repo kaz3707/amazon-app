@@ -489,7 +489,7 @@ function buildProductCardEl(p) {
     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
       <button class="deepdive-btn" style="flex:1 1 100%;padding:8px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600"
         onclick="selectProductForAnalysis(${JSON.stringify(p).replace(/"/g, '&quot;')})">
-        🔍 深堀り（利益計算へ）→
+        💰 利益計算へ →
       </button>
       <button class="analyze-btn" style="flex:1" onclick="openRivalModal(${JSON.stringify(p).replace(/"/g, '&quot;')})">
         同カテゴリ TOP100を確認 →
@@ -704,6 +704,7 @@ function renderCategoryTop100(products, categoryPath, targetProduct, opts = {}) 
       (isSelf ? " top100-row--self" : "") +
       (isHit ? " top100-row--hit" : "");
     const hitMark = isHit ? '<span class="top100-hitmark" title="絞り込み条件にヒット">✓</span>' : "";
+    const prodJson = JSON.stringify(c).replace(/"/g, '&quot;');
     return `
       <div class="${rowClass}">
         <span class="${rankBadgeClass(rank)}">${rank}位</span>
@@ -711,7 +712,8 @@ function renderCategoryTop100(products, categoryPath, targetProduct, opts = {}) 
         <span class="top100-price">¥${(Number(c.price) || 0).toLocaleString()}</span>
         <span class="top100-reviews" style="color:${reviewColor(c.review_count || 0)}">⭐${(c.review_count || 0).toLocaleString()}</span>
         <span class="top100-sales" style="color:${salesColor(c.estimated_monthly_sales || 0)}">月販${(c.estimated_monthly_sales || 0).toLocaleString()}</span>
-        <a class="top100-link" href="${c.url || `https://www.amazon.co.jp/dp/${c.asin}`}" target="_blank" rel="noopener">↗</a>
+        <button class="top100-calc-btn" onclick="selectRivalRowForAnalysis(${prodJson})" title="この商品の利益計算へ">💰</button>
+        <a class="top100-link" href="${c.url || `https://www.amazon.co.jp/dp/${c.asin}`}" target="_blank" rel="noopener" title="Amazon商品ページを開く">↗</a>
       </div>`;
   }).join("");
 
@@ -750,6 +752,12 @@ function renderCategoryTop100(products, categoryPath, targetProduct, opts = {}) 
 
 function closeRivalModalAndAnalyze() {
   const product = window._rivalModalProduct;
+  document.getElementById("rival-modal-overlay")?.remove();
+  if (!product) return;
+  selectProductForAnalysis(product);
+}
+
+function selectRivalRowForAnalysis(product) {
   document.getElementById("rival-modal-overlay")?.remove();
   if (!product) return;
   selectProductForAnalysis(product);
