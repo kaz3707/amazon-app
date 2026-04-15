@@ -115,14 +115,14 @@ header .header-actions { display: flex; gap: 8px; }
   position: absolute;
   top: calc(100% + 2px);
   left: 0;
-  width: 720px;
+  width: 900px;
   max-width: 95vw;
   background: #fff;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
   box-shadow: var(--shadow-md);
   z-index: 300;
-  max-height: 440px;
+  max-height: calc(100vh - 140px);
   display: flex;
   flex-direction: column;
 }
@@ -153,11 +153,18 @@ header .header-actions { display: flex; gap: 8px; }
 }
 .cat-col {
   flex: 1;
-  min-width: 180px;
+  min-width: 220px;
   border-right: 1px solid var(--gray-100);
   overflow-y: auto;
   background: #fff;
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f3f4f6;
 }
+/* WebKit系ブラウザ（Chrome/Edge/Safari）でスクロールバーを常時表示 */
+.cat-col::-webkit-scrollbar { width: 10px; }
+.cat-col::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 5px; }
+.cat-col::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 5px; border: 2px solid #f3f4f6; }
+.cat-col::-webkit-scrollbar-thumb:hover { background: #6b7280; }
 .cat-col:nth-child(even) { background: #fafafa; }
 .cat-col:last-child { border-right: none; }
 .cat-item {
