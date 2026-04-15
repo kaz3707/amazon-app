@@ -16,9 +16,54 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupResearch();
   setupLookup();
   setupAnalyze();
+  setupBoughtFetch();
   loadWatchlistFromStorage();
   loadMasterData();
 });
+
+/* =============================================
+   購入実績バッジの実取得（「実売数を取得」ボタン）
+   ============================================= */
+function setupBoughtFetch() {
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".bought-fetch-btn");
+    if (!btn) return;
+    e.stopPropagation();
+    const asin = btn.dataset.asin;
+    if (!asin) return;
+    btn.disabled = true;
+    const origText = btn.textContent;
+    btn.textContent = "取得中...";
+    try {
+      const res = await callNetlifyFunction("get-bought-badge", { asin });
+      renderBoughtCell(asin, res.count, res.text);
+      // state.browseResultsのキャッシュも更新（再ソート時に残すため）
+      const target = (state.browseResults || []).find(p => p.asin === asin);
+      if (target) {
+        target.bought_in_past_month = res.count;
+        target.bought_in_past_month_text = res.text || "";
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = origText;
+      showToast(`取得失敗: ${err.message}`, "error");
+    }
+  });
+}
+
+function renderBoughtCell(asin, count, text) {
+  const cell = document.getElementById(`bought-cell-${asin}`);
+  if (!cell) return;
+  if (count > 0) {
+    cell.innerHTML =
+      `<div class="stat-value good">${Number(count).toLocaleString()}以上</div>
+       <div class="stat-label" title="${(text || '').replace(/"/g, '&quot;')}">🟢 月販実績</div>`;
+  } else {
+    cell.innerHTML =
+      `<div class="stat-value" style="color:#9ca3af;font-size:14px">実績バッジなし</div>
+       <div class="stat-label">購入実績データなし</div>`;
+  }
+}
 
 function loadMasterData() {
   // Amazonカテゴリ手数料（JS定数から直接ロード）
@@ -358,9 +403,17 @@ function buildProductCardEl(p) {
         <div class="stat-value" style="color:#2563eb">¥${Number(p.price).toLocaleString()}</div>
         <div class="stat-label">販売価格</div>
       </div>
-      <div class="stat-item">
-        <div class="stat-value ${salesClass}">${Number(p.estimated_monthly_sales).toLocaleString()}${p.sales_from_badge ? "以上" : ""}</div>
-        <div class="stat-label">${p.variation_count > 1 ? `月販(${p.variation_count}種合算)` : "月間販売数"}</div>
+      <div class="stat-item" id="bought-cell-${p.asin}">
+        ${p.bought_in_past_month != null
+          ? (p.bought_in_past_month > 0
+              ? `<div class="stat-value good">${Number(p.bought_in_past_month).toLocaleString()}以上</div>
+                 <div class="stat-label" title="Amazon公式の購入実績">🟢 月販実績</div>`
+              : `<div class="stat-value" style="color:#9ca3af;font-size:14px">実績バッジなし</div>
+                 <div class="stat-label">購入実績データなし</div>`)
+          : `<div class="stat-value ${salesClass}" style="color:#9ca3af">~${Number(p.estimated_monthly_sales).toLocaleString()}</div>
+             <div class="stat-label" title="BSR順位からの推計（誤差大）">⚠ 月販推計(BSR)</div>
+             <button class="bought-fetch-btn" data-asin="${p.asin}" style="margin-top:4px;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer">実売数を取得</button>`
+        }
       </div>
       <div class="stat-item">
         <div class="stat-value ${reviewClass}">${p.review_count}</div>
