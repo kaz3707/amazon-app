@@ -603,6 +603,9 @@ async function openRivalModal(product) {
 
   try {
     const products = await fetchCategoryTop100(categoryPath);
+    window._rivalModalAllProducts = products;
+    window._rivalModalCategoryPath = categoryPath;
+    window._rivalModalFilterQuery = "";
     renderCategoryTop100(products, categoryPath, product);
   } catch (err) {
     document.getElementById("rival-modal-body").innerHTML = `
@@ -614,9 +617,25 @@ async function openRivalModal(product) {
   }
 }
 
-function renderCategoryTop100(products, categoryPath, targetProduct) {
+function applyRivalModalFilter() {
+  const q = (document.getElementById("rival-filter-input")?.value || "").trim();
+  window._rivalModalFilterQuery = q;
+  const all = window._rivalModalAllProducts || [];
+  const target = window._rivalModalProduct;
+  const categoryPath = window._rivalModalCategoryPath || "";
+  renderCategoryTop100(all, categoryPath, target, { preserveInputFocus: true });
+}
+
+function clearRivalModalFilter() {
+  const input = document.getElementById("rival-filter-input");
+  if (input) input.value = "";
+  applyRivalModalFilter();
+}
+
+function renderCategoryTop100(products, categoryPath, targetProduct, opts = {}) {
   const body = document.getElementById("rival-modal-body");
   if (!body) return;
+  const query = (window._rivalModalFilterQuery || "").toLowerCase();
   const reviewColor = (n) => n <= 30 ? "#16a34a" : n <= 100 ? "#d97706" : "#dc2626";
   const salesColor = (n) => n >= 500 ? "#16a34a" : n >= 300 ? "#d97706" : "#6b7280";
 
@@ -628,8 +647,21 @@ function renderCategoryTop100(products, categoryPath, targetProduct) {
       <span style="margin-left:8px;color:#16a34a">⭐${targetProduct.review_count}件 / 月販${targetProduct.estimated_monthly_sales}個</span>
     </div>`;
 
+  // 検索ボックス（モーダル内でタイトルフィルタ）
+  const filterHtml = `
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+      <input type="search" id="rival-filter-input" placeholder="🔍 商品名で絞り込み（例: クーラーボックス、折りたたみ、など）"
+        value="${query.replace(/"/g, '&quot;')}"
+        oninput="applyRivalModalFilter()"
+        style="flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+      <button onclick="clearRivalModalFilter()"
+        style="padding:7px 12px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;font-size:12px">
+        ✕ クリア
+      </button>
+    </div>`;
+
   if (!products.length) {
-    body.innerHTML = selfHtml + `
+    body.innerHTML = selfHtml + filterHtml + `
       <div style="text-align:center;padding:40px;color:#9ca3af">
         <div style="font-size:20px;margin-bottom:8px">📭</div>
         <div>キャッシュにこのカテゴリの商品がありません</div>
@@ -641,6 +673,12 @@ function renderCategoryTop100(products, categoryPath, targetProduct) {
   const hitAsins = new Set((state.browseResults || []).map(p => p.asin));
   let hitCount = 0;
 
+  // タイトルフィルタ適用 → ランク昇順でソート
+  const filtered = (query
+    ? products.filter(p => (p.title || "").toLowerCase().includes(query))
+    : products.slice()
+  ).sort((a, b) => (a.rank_in_category || 999) - (b.rank_in_category || 999));
+
   const rankBadgeClass = (r) => {
     if (r <= 10) return "top100-rank-badge rank-gold";
     if (r <= 30) return "top100-rank-badge rank-silver";
@@ -648,9 +686,17 @@ function renderCategoryTop100(products, categoryPath, targetProduct) {
     return "top100-rank-badge rank-plain";
   };
 
-  const rowsHtml = products.map((c, i) => {
+  const highlightTitle = (t) => {
+    if (!query) return t;
+    const safe = t.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const re = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return safe.replace(re, m => `<mark style="background:#fef08a;color:inherit;padding:0 2px;border-radius:2px">${m}</mark>`);
+  };
+
+  const rowsHtml = filtered.map((c, i) => {
     const rank = c.rank_in_category || (i + 1);
-    const title = c.title.length > 55 ? c.title.slice(0, 55) + "…" : c.title;
+    const rawTitle = c.title.length > 55 ? c.title.slice(0, 55) + "…" : c.title;
+    const title = highlightTitle(rawTitle);
     const isSelf = c.asin === targetProduct.asin;
     const isHit = hitAsins.has(c.asin) && !isSelf;
     if (isHit) hitCount++;
@@ -672,13 +718,34 @@ function renderCategoryTop100(products, categoryPath, targetProduct) {
   const hitLegend = hitCount > 0
     ? `<span style="margin-left:10px;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:4px;font-weight:600">✓ 絞り込みヒット: ${hitCount}件</span>`
     : "";
+  const filterLegend = query
+    ? `<span style="margin-left:10px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-weight:600">🔍 「${query}」: ${filtered.length}件一致</span>`
+    : "";
 
-  body.innerHTML = selfHtml + `
+  const listHtml = filtered.length === 0
+    ? `<div style="text-align:center;padding:40px;color:#9ca3af">
+        <div style="font-size:20px;margin-bottom:8px">🔍</div>
+        <div>「${query}」に一致する商品はありません</div>
+       </div>`
+    : `<div class="top100-list">${rowsHtml}</div>`;
+
+  body.innerHTML = selfHtml + filterHtml + `
     <div style="font-size:12px;color:#6b7280;margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap">
-      <span>${categoryPath} — ${products.length}件</span>
+      <span>${categoryPath} — 全${products.length}件</span>
+      ${filterLegend}
       ${hitLegend}
     </div>
-    <div class="top100-list">${rowsHtml}</div>`;
+    ${listHtml}`;
+
+  // 入力フォーカスとカーソル位置を復元（再描画でフォーカスが失われるのを防ぐ）
+  if (opts.preserveInputFocus) {
+    const input = document.getElementById("rival-filter-input");
+    if (input) {
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  }
 }
 
 function closeRivalModalAndAnalyze() {
