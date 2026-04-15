@@ -158,8 +158,10 @@ function updateCacheStatusBar(data) {
   }
 }
 
-/* ===== カテゴリツリーナビゲーション ===== */
+/* ===== カテゴリツリーナビゲーション（カラムビュー） ===== */
 let _catTree = {};
+let _currentPath = [];    // パネルで今プレビュー中のパス（未確定）
+let _selectedPath = [];   // 最後に確定したパス（パネル再オープン時の初期状態）
 
 function _buildCatTree(categories) {
   const tree = {};
@@ -176,7 +178,7 @@ function _buildCatTree(categories) {
 
 function populateCategorySelect(categories) {
   _catTree = _buildCatTree(categories);
-  renderCatLevel(_catTree, []);
+  renderCatColumns();
 
   document.addEventListener("click", (e) => {
     const root = document.getElementById("cat-nav-root");
@@ -190,41 +192,84 @@ function populateCategorySelect(categories) {
 function toggleCatPanel() {
   const panel = document.getElementById("cat-panel");
   if (panel.style.display === "none") {
-    renderCatLevel(_catTree, []);
+    _currentPath = [..._selectedPath];
+    renderCatColumns();
     panel.style.display = "flex";
   } else {
     panel.style.display = "none";
   }
 }
 
-function renderCatLevel(node, path) {
-  const breadcrumb = document.getElementById("cat-breadcrumb");
-  const list = document.getElementById("cat-list");
+function _nodeAtPath(path) {
+  let node = _catTree;
+  for (const p of path) {
+    if (!node[p]) return null;
+    node = node[p];
+  }
+  return node;
+}
 
-  if (path.length === 0) {
-    breadcrumb.innerHTML = '<span style="color:var(--gray-400)">カテゴリを選択</span>';
-  } else {
-    breadcrumb.innerHTML =
-      `<span class="cat-back" onclick="catNavBack(${JSON.stringify(path)})">← 戻る</span>` +
-      `<span class="cat-bc-path">${path.join(" › ")}</span>`;
+function renderCatColumns() {
+  const panel = document.getElementById("cat-panel");
+  panel.innerHTML = "";
+
+  // ブレッドクラム
+  const bc = document.createElement("div");
+  bc.className = "cat-breadcrumb";
+  const crumb = _currentPath.length === 0
+    ? '<span style="color:var(--gray-400)">カテゴリを選択（クリックで絞り込み）</span>'
+    : `<span class="cat-bc-path">${_currentPath.join(" › ")}</span>`;
+  bc.innerHTML = crumb +
+    `<span class="cat-back" style="margin-left:auto" onclick="clearCatSelection()">✕ クリア</span>`;
+  panel.appendChild(bc);
+
+  // カラム群コンテナ
+  const cols = document.createElement("div");
+  cols.className = "cat-cols";
+
+  // 各階層を列として描画（選択中のパスに沿って列を展開）
+  let depth = 0;
+  while (true) {
+    const prefix = _currentPath.slice(0, depth);
+    const node = _nodeAtPath(prefix);
+    if (!node || Object.keys(node).length === 0) break;
+    const selectedKey = _currentPath[depth];
+    cols.appendChild(_buildCatColumn(node, prefix, selectedKey));
+    if (selectedKey && node[selectedKey] && Object.keys(node[selectedKey]).length > 0) {
+      depth++;
+    } else {
+      break;
+    }
   }
 
-  list.innerHTML = "";
+  panel.appendChild(cols);
+}
 
+function _buildCatColumn(node, pathPrefix, selectedKey) {
+  const col = document.createElement("div");
+  col.className = "cat-col";
+
+  // この階層全体を選択するオプション
   const allItem = document.createElement("div");
   allItem.className = "cat-item cat-item-all";
-  const allLabel = path.length === 0 ? "全カテゴリ（絞り込まない）" : path[path.length - 1] + "（全て）";
-  const allValue = path.length === 0 ? "" : path.join(" > ");
+  const allLabel = pathPrefix.length === 0
+    ? "全カテゴリ（絞り込まない）"
+    : pathPrefix[pathPrefix.length - 1] + "（全て）";
+  const allValue = pathPrefix.join(" > ");
   allItem.textContent = allLabel;
-  allItem.addEventListener("click", (e) => { e.stopPropagation(); selectCatValue(allValue, allLabel); });
-  list.appendChild(allItem);
+  allItem.addEventListener("click", (e) => {
+    e.stopPropagation();
+    selectCatValue(allValue, allValue ? pathPrefix.join(" › ") : allLabel);
+  });
+  col.appendChild(allItem);
 
   const keys = Object.keys(node).sort();
   for (const key of keys) {
     const hasChildren = Object.keys(node[key]).length > 0;
     const item = document.createElement("div");
     item.className = "cat-item" + (hasChildren ? " cat-item-parent" : "");
-    const childPath = [...path, key];
+    if (key === selectedKey) item.classList.add("cat-item-selected");
+    const childPath = [...pathPrefix, key];
 
     if (hasChildren) {
       const nameSpan = document.createElement("span");
@@ -237,7 +282,8 @@ function renderCatLevel(node, path) {
       item.appendChild(arrow);
       item.addEventListener("click", (e) => {
         e.stopPropagation();
-        renderCatLevel(node[key], childPath);
+        _currentPath = childPath;
+        renderCatColumns();
       });
     } else {
       item.textContent = key;
@@ -246,15 +292,9 @@ function renderCatLevel(node, path) {
         selectCatValue(childPath.join(" > "), childPath.join(" › "));
       });
     }
-    list.appendChild(item);
+    col.appendChild(item);
   }
-}
-
-function catNavBack(path) {
-  path.pop();
-  let node = _catTree;
-  for (const p of path) node = node[p];
-  renderCatLevel(node, path);
+  return col;
 }
 
 function selectCatValue(value, label) {
@@ -262,6 +302,16 @@ function selectCatValue(value, label) {
   document.getElementById("cat-display-text").textContent =
     value ? label : "全カテゴリ（絞り込まない）";
   document.getElementById("cat-panel").style.display = "none";
+  _selectedPath = value ? value.split(" > ") : [];
+  _currentPath = [..._selectedPath];
+}
+
+function clearCatSelection() {
+  _currentPath = [];
+  _selectedPath = [];
+  document.getElementById("filter-category").value = "";
+  document.getElementById("cat-display-text").textContent = "全カテゴリ（絞り込まない）";
+  renderCatColumns();
 }
 
 async function runBrowse() {

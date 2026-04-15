@@ -114,13 +114,15 @@ header .header-actions { display: flex; gap: 8px; }
 .cat-panel {
   position: absolute;
   top: calc(100% + 2px);
-  left: 0; right: 0;
+  left: 0;
+  width: 720px;
+  max-width: 95vw;
   background: #fff;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
   box-shadow: var(--shadow-md);
   z-index: 300;
-  max-height: 280px;
+  max-height: 440px;
   display: flex;
   flex-direction: column;
 }
@@ -142,8 +144,22 @@ header .header-actions { display: flex; gap: 8px; }
   flex-shrink: 0;
 }
 .cat-back:hover { text-decoration: underline; }
-.cat-bc-path { color: var(--gray-400); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cat-list { overflow-y: auto; flex: 1; }
+.cat-bc-path { color: var(--gray-600); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.cat-cols {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.cat-col {
+  flex: 1;
+  min-width: 180px;
+  border-right: 1px solid var(--gray-100);
+  overflow-y: auto;
+  background: #fff;
+}
+.cat-col:nth-child(even) { background: #fafafa; }
+.cat-col:last-child { border-right: none; }
 .cat-item {
   padding: 8px 12px;
   cursor: pointer;
@@ -156,9 +172,15 @@ header .header-actions { display: flex; gap: 8px; }
 }
 .cat-item:last-child { border-bottom: none; }
 .cat-item:hover { background: var(--gray-50); }
-.cat-item-all { color: var(--gray-600); }
-.cat-item-name { flex: 1; }
-.cat-item-arrow { color: var(--gray-400); font-size: 16px; line-height: 1; }
+.cat-item-all { color: var(--gray-600); font-style: italic; font-size: 12px; }
+.cat-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-item-arrow { color: var(--gray-400); font-size: 16px; line-height: 1; flex-shrink: 0; margin-left: 4px; }
+.cat-item-selected {
+  background: #dbeafe !important;
+  color: var(--primary);
+  font-weight: 600;
+}
+.cat-item-selected .cat-item-arrow { color: var(--primary); }
 
 /* ===== フォーム ===== */
 .form-group { margin-bottom: 12px; }
