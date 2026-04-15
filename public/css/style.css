@@ -114,11 +114,9 @@ header .header-actions { display: flex; gap: 8px; }
 .cat-display:hover { border-color: var(--primary); }
 .cat-display-arrow { color: var(--gray-400); font-size: 11px; flex-shrink: 0; margin-left: 6px; }
 .cat-panel {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  width: 900px;
-  max-width: 95vw;
+  position: relative;
+  margin-top: 4px;
+  width: 100%;
   background: #fff;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
